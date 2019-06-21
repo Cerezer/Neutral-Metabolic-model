@@ -1,0 +1,68 @@
+#################################################
+# Function used to simulate the dynamics of communities through neutral (Neutral Theory of Biodiversity) and metabolic (Metabolic Theory of Ecology) processes
+# Created by FO Cerezer - September 2017
+
+################################
+#Use: NeutralTempModel(temp,comInd,coms,nind,comm1,D,vlogit,b,z,E,K,ngen)
+
+# Parameters:
+          #temp temperature extracted in each cell 
+          #comInd identifies in which cell the individual is present
+          #coms community indexer
+          #nind number of individuals in each cell
+          #comm1  identifies the species of the individual 
+          #D geographic distance between pairs of cells
+          #vlogit basal speciation rate transformed into exponential
+          #b intensity of the temperature effect on the speciation rate
+          #z rate at which the dispersal decays with the geographic distance (dispersal limitation)
+          #E activation energy of metabolic processes
+          #k Boltzmann's constant
+          #ngen number of simulated generations
+
+# Output:
+# Simulated richness across communities (South America cells) from different combinations of parameter values
+
+################################
+# Function
+
+NeutralTempModel<-function(temp,comInd,coms,nind,comm1,D,vlogit,b,z,E,K,ngen){
+
+  #### Calculate dispersal between all pairs of individual locations/cells
+  disp<-exp(-z*D/1000) #/1000 (transform into km)
+
+  # Speciation rate with temperature effects
+  # speciation rate in cell i depends on temp
+  v<-1/(1+exp(-vlogit))
+  vcell<- (v*exp(-b*E/(K*temp)))/(min(exp(-b*E/(K*temp))))
+
+  # attributes speciation rate for each individual
+  vind<-vcell[comInd]
+
+  #### Start simulation ####
+
+  for(i in 1:ngen){
+
+    # Define if new individual is a new species (otherwise is the sibbling of another individual from the metacommunity)
+    speciate<-runif(comm1)<vind
+
+    comm1pre<-comm1
+    for(Q in coms){
+
+      comm1[comInd==Q]<-sample(comm1pre,nind[Q],prob = disp[Q,comInd]/nind[comInd],replace = TRUE)
+      #comm1[comInd==Q]<-sample(comm1pre,nind[Q],prob = PCom[Q,comInd]/nind[comInd],replace = TRUE)
+
+    }
+
+    comm1[speciate]<-(max(comm1)+1):(max(comm1)+sum(speciate)) # then individual is replaced by a new species
+
+    # Recycle
+    comm1[1:length(comm1)]<-as.integer(factor(comm1)) # Recycle numbers to avoid having more than 400 names
+
+  }
+
+  return(comm1)
+
+}
+
+# NeutralTempModel
+## End
