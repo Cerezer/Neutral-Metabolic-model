@@ -1,0 +1,55 @@
+#################################################
+# Function used to extract species occurrence data
+# Created by FO Cerezer in August 2017
+
+################################
+#Use: ExtractOcc(raster,folder)
+
+# Loading R packages
+library(reshape)
+library(rgdal)
+library(raster)
+library(maptools)
+
+# Parameters:
+         
+          # raster  raster containing a gridded geographic region
+          # folder  directory in which the species distributions shapefile are arranged
+            
+# Output:
+# The matrix of presence/absence of each species in each cell
+
+################################
+# Function
+
+ExtractOcc <-function(raster,folder){
+
+  Coords<-coordinates(raster[[1]])  # coordinates of each cell
+  Coords2<-SACoords[!is.na(raster[[1]]@data@values),] 
+
+  FinalTable<-Coords2 
+  FinalTable # indexer of the cells
+
+  arquivos<- list.files(folder,pattern = "*.shp",recursive = TRUE) # search the .shp file in each species folder
+
+  arquivosxml<-list.files(folder,pattern = "*.xml",recursive = TRUE) # search the .xml file in each species folder
+
+  arquivos<- arquivos[!arquivos%in%arquivosxml]
+
+  for(i in arquivos){
+
+    Shape1 <- readShapeSpatial(paste(folder,i,sep="")) # recognizes the shapefile of the species
+    
+    Raster1<-rasterize(Shape1,raster,mask=FALSE,getCover=TRUE) # maps the shapefile of the species within each cell and calculates the community size (a proxy for abundance)
+
+    values<-extract(Raster1,Coords2) # extracts the presence/absence values of the species in each cell
+    FinalTable<-cbind(FinalTable,values)# save the extracted values in the FinalTable object
+    print(ncol(FinalTable)-2)
+
+  }
+  return(FinalTable)
+
+}
+
+# ExtractOcc
+### End
