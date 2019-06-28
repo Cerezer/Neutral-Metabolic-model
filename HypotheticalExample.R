@@ -44,7 +44,7 @@ D<- as.matrix(dist(Coord))
 
 ## Define model parameters
 
-z # Rate in which dispersal decays with geodistance
+#z # Rate in which dispersal decays with geodistance
  
 temp<-c(10,14,8)+273.15 # Hypothetical temperature for each community in Kelvin
 
