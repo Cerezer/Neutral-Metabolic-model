@@ -54,7 +54,7 @@ E<-0.65 # Activation energy of metabolic processes
 
 K<- 8.617*10^-5 # Boltzmann's constant
 
-b # The intensity of the temperature effect on the basal speciation rate
+# b # The intensity of the temperature effect on the basal speciation rate
 
 ## Grid Aproximation function 
 # This approach was used to investigate the probability of different values of the parameters (z, vlogit, and b) explain the observed data of the communities
@@ -78,8 +78,8 @@ library(snow)
 library(Rmpi)
 
 ## Load functions
-load(NeutralTempModel)
-load(GridApproxFunct)
+source(NeutralTempModel)
+source(GridApproxFunct)
 
 
 {
@@ -95,7 +95,7 @@ load(GridApproxFunct)
 ## Calculating the log-likelihood for each combination
 
 ## Finds the list of files containing the parameter combinations and saves it in the ParsOpen object   
-ParsOpen<- list.dirs(".../")
+ParsOpen<- list.dirs("./", recursive = F)
 
 ## Saves the observed species richness in Sobs object 
 Sobs<-tapply(comm1,comInd,function(x)length(unique(x))) 
@@ -131,3 +131,6 @@ for (i in 1:length(ParsOpen)) {
   loglik[i]<-sum(dpois(Sobs,lambdaMean,log = TRUE))
   
 }
+                       
+   # Acessing the likelihood values for each combination of parameters 
+   loglik
